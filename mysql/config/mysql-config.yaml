@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-config
+  namespace: mysql
+data:
+  mysql.cnf: |-
+    [mysqld]
+    ssl-ca=/spire/certs/bundle.0.pem
+    ssl-cert=/spire/certs/svid.0.pem
+    ssl-key=/spire/certs/svid.0.key
+    require_secure_transport=ON

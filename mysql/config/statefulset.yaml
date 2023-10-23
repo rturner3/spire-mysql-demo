@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql
+  namespace: mysql
+  labels:
+    app: mysql-server
+spec:
+  selector:
+    matchLabels:
+      app: mysql-server
+  template:
+    metadata:
+      namespace: mysql
+      labels:
+        app: mysql-server
+    spec:
+      hostPID: true
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      initContainers:
+        - name: svid-retriever
+          image: alpine:3.18
+          command: ["/bin/sh", "-c", "--" ]
+          args: [
+            "wget https://github.com/spiffe/spire/releases/download/v1.8.2/spire-1.8.2-linux-amd64-musl.tar.gz;
+             tar -xvf spire-1.8.2-linux-amd64-musl.tar.gz;
+             /spire-1.8.2/bin/spire-agent api fetch x509 -socketPath /run/spire/sockets/agent.sock -write /spire/certs;
+             chmod +r /spire/certs/*;"
+          ]
+          volumeMounts:
+            - name: spire-agent-socket
+              mountPath: /run/spire/sockets
+              readOnly: true
+            - name: server-certs
+              mountPath: /spire/certs
+      containers:
+        - image: mysql:8.1
+          name: mysql
+          args:
+            - --defaults-file=/etc/mysql-cfg/mysql.cnf
+          env:
+            # Use secret in real usage
+            - name: MYSQL_ROOT_PASSWORD
+              value: password
+          ports:
+            - containerPort: 3306
+              name: mysql
+          volumeMounts:
+            - name: mysql-persistent-storage
+              mountPath: /var/lib/mysql
+            - name: server-certs
+              mountPath: /spire/certs
+            - name: config-volume
+              mountPath: /etc/mysql-cfg
+      volumes:
+        - name: mysql-persistent-storage
+          persistentVolumeClaim:
+            claimName: mysql-persistent-volume-claim
+        - name: spire-agent-socket
+          hostPath:
+            path: /run/spire/sockets
+            type: Directory
+        - name: server-certs
+          emptyDir: {}
+        - name: config-volume
+          configMap:
+            name: mysql-config
