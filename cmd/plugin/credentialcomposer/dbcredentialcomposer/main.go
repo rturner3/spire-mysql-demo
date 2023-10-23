@@ -77,6 +77,8 @@ func (p *Plugin) ComposeWorkloadX509SVID(ctx context.Context, req *credentialcom
 				return nil, err
 			}
 
+			// Interpret the last path component to be the MySQL username.
+			// Set the MySQL username as the Subject CN of the X.509-SVID so that it can be used for authentication to MySQL.
 			pathComponents := strings.Split(spiffeID.Path(), "/")
 			mySQLDBInstanceName := pathComponents[len(pathComponents)-1]
 			resp := &credentialcomposerv1.ComposeWorkloadX509SVIDResponse{
