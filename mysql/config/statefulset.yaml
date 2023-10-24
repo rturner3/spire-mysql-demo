@@ -28,6 +28,14 @@ spec:
             - name: server-certs
               mountPath: /spire/certs
       containers:
+        - name: tls-reload
+          image: chiragk25/spire-mysql-tls-reload:latest
+          volumeMounts:
+            - name: spire-agent-socket
+              mountPath: /run/spire/sockets
+              readOnly: true
+            - name: server-certs
+              mountPath: /spire/certs
         - image: mysql:8.1
           name: mysql
           args:
