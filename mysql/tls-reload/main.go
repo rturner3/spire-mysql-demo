@@ -24,8 +24,8 @@ const (
 	socketPath = "unix:///run/spire/sockets/agent.sock"
 	svidDir    = "/spire/certs"
 	bundleFile = "bundle.0.pem"
-	certFile   = "svid.0.key"
-	keyFile    = "bundle.0.pem"
+	certFile   = "svid.0.pem"
+	keyFile    = "svid.0.key"
 
 	// MySQL related constants
 	mysqlUser           = "mysql-tls-reloader"
@@ -52,11 +52,11 @@ func main() {
 	// Wait for an os.Interrupt signal
 	go waitForCtrlC(cancel)
 
-	// Start X.509 and JWT watchers
-	startWatchers(ctx)
+	// Start X.509 watcher
+	startWatcher(ctx)
 }
 
-func startWatchers(ctx context.Context) {
+func startWatcher(ctx context.Context) {
 	var wg sync.WaitGroup
 
 	// Creates a new Workload API client, connecting to provided socket path
