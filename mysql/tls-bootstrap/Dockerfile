@@ -1,15 +1,4 @@
-FROM golang:1.19 as build-stage
-
-RUN apt-get update && apt-get install -y ca-certificates openssl
-
-ARG cert_location=/usr/local/share/ca-certificates
-
-# Get certificate from "github.com" and "proxy.golang.org".
-# This is required for go mod download to run successfully
-RUN openssl s_client -showcerts -connect github.com:443 </dev/null 2>/dev/null|openssl x509 -outform PEM > ${cert_location}/github.crt
-RUN openssl s_client -showcerts -connect proxy.golang.org:443 </dev/null 2>/dev/null|openssl x509 -outform PEM >  ${cert_location}/proxy.golang.crt
-# Update certificates
-RUN update-ca-certificates
+FROM golang:1.21.3 as build-stage
 
 WORKDIR /app
 

@@ -1,6 +1,6 @@
 module github.com/spire-mysql-demo/mysql/tls-bootstrap
 
-go 1.19
+go 1.21
 
 require github.com/spiffe/go-spiffe/v2 v2.1.6
 

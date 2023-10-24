@@ -40,7 +40,7 @@ func main() {
 
 	err = writeX509Context(x509Context)
 	if err != nil {
-		log.Fatalf("failed to write SVID/Bundle to disk: %v", err)
+		log.Fatalf("Failed to write SVID/Bundle to disk: %v", err)
 	}
 
 	log.Printf("SVID/Bundle files written successfully in %s directory", svidDir)
@@ -57,17 +57,17 @@ func writeX509Context(c *workloadapi.X509Context) error {
 		return err
 	}
 
-	err = os.WriteFile(certFilePath, certBytes, 0644)
+	err = os.WriteFile(certFilePath, certBytes, 0o644)
 	if err != nil {
 		return err
 	}
 
-	err = os.WriteFile(keyFilePath, keyBytes, 0644)
+	err = os.WriteFile(keyFilePath, keyBytes, 0o644)
 	if err != nil {
 		return err
 	}
 
-	err = os.WriteFile(bundleFilePath, bundleBytes, 0644)
+	err = os.WriteFile(bundleFilePath, bundleBytes, 0o644)
 	if err != nil {
 		return err
 	}
