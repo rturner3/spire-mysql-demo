@@ -11,7 +11,7 @@ kubectl exec -n spire spire-server-0 -- \
     /opt/spire/bin/spire-server entry create \
     -spiffeID spiffe://example.org/mysql/server \
     -parentID spiffe://example.org/ns/spire/sa/spire-agent \
-    -ttl 2m \
-    -hint mysql-server
+    -x509SVIDTTL 120 \
+    -hint mysql-server \
     -selector k8s:ns:mysql \
     -selector k8s:pod-label:app:mysql-server
