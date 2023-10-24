@@ -13,5 +13,6 @@ kubectl exec -n spire spire-server-0 -- \
     -parentID spiffe://example.org/ns/spire/sa/spire-agent \
     -x509SVIDTTL 120 \
     -hint mysql-server \
+    -dns mysql.mysql.svc.cluster.local \
     -selector k8s:ns:mysql \
     -selector k8s:pod-label:app:mysql-server
