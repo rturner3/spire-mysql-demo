@@ -50,6 +50,13 @@ data:
         plugin_data {
         }
       }
+
+      CredentialComposer "db" {
+        plugin_cmd = "/opt/spire/bin/dbcredentialcomposer"
+        plugin_data {
+          mysql_spiffe_id_path_prefixes = ["/mysql/client/"]
+        }
+      }
     }
 
     health_checks {
