@@ -36,14 +36,13 @@ spec:
               readOnly: true
             - name: server-certs
               mountPath: /spire/certs
-        - image: mysql:8.1
+        - image: mysql:8.2
           name: mysql
           args:
             - --defaults-file=/etc/mysql-cfg/mysql.cnf
           env:
-            # Use secret in real usage
-            - name: MYSQL_ROOT_PASSWORD
-              value: password
+            - name: MYSQL_RANDOM_ROOT_PASSWORD
+              value: "true"
           ports:
             - containerPort: 3306
               name: mysql
