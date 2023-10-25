@@ -3,16 +3,16 @@ package main
 import (
 	"context"
 	"crypto/tls"
-	"crypto/x509"
 	"database/sql"
 	"errors"
 	"fmt"
 	"log"
 	"os"
 	"os/signal"
-	"sync"
 
 	"github.com/go-sql-driver/mysql"
+	"github.com/spiffe/go-spiffe/v2/spiffeid"
+	"github.com/spiffe/go-spiffe/v2/spiffetls/tlsconfig"
 	"github.com/spiffe/go-spiffe/v2/svid/x509svid"
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 	"google.golang.org/grpc/codes"
@@ -44,6 +44,9 @@ var (
 
 	// Format is specified https://github.com/go-sql-driver/mysql#dsn-data-source-name
 	dbConnectionString = fmt.Sprintf("%s@tcp(%s:%s)/?tls=%s", mysqlUser, mysqlHost, mysqlPort, mysqlTLSConfigName)
+
+	// SPIFFE ID for MySQL Server
+	mysqlServerSPIFFEID, _ = spiffeid.FromString("spiffe://example.org/mysql/server")
 )
 
 func main() {
@@ -57,8 +60,6 @@ func main() {
 }
 
 func startWatcher(ctx context.Context) {
-	var wg sync.WaitGroup
-
 	// Creates a new Workload API client, connecting to provided socket path
 	// Environment variable `SPIFFE_ENDPOINT_SOCKET` is used as default
 	client, err := workloadapi.New(ctx, workloadapi.WithAddr(socketPath))
@@ -67,17 +68,17 @@ func startWatcher(ctx context.Context) {
 	}
 	defer client.Close()
 
-	wg.Add(1)
 	// Start a watcher for X.509 SVID updates
+	doneCh := make(chan struct{}, 1)
 	go func() {
-		defer wg.Done()
 		err := client.WatchX509Context(ctx, &x509Watcher{})
 		if err != nil && status.Code(err) != codes.Canceled {
 			log.Fatalf("Error watching X.509 context: %v", err)
 		}
+		doneCh <- struct{}{}
 	}()
 
-	wg.Wait()
+	<-doneCh
 }
 
 // x509Watcher is a sample implementation of the workloadapi.X509ContextWatcher interface
@@ -139,18 +140,15 @@ func writeX509Context(c *workloadapi.X509Context) error {
 		return err
 	}
 
-	err = os.WriteFile(certFilePath, certBytes, 0o644)
-	if err != nil {
+	if err = os.WriteFile(certFilePath, certBytes, 0o644); err != nil {
 		return err
 	}
 
-	err = os.WriteFile(keyFilePath, keyBytes, 0o644)
-	if err != nil {
+	if err = os.WriteFile(keyFilePath, keyBytes, 0o644); err != nil {
 		return err
 	}
 
-	err = os.WriteFile(bundleFilePath, bundleBytes, 0o644)
-	if err != nil {
+	if err = os.WriteFile(bundleFilePath, bundleBytes, 0o644); err != nil {
 		return err
 	}
 
@@ -163,33 +161,7 @@ func createTLSConf(c *workloadapi.X509Context) (*tls.Config, error) {
 		return nil, err
 	}
 
-	certBytes, keyBytes, err := svid.Marshal()
-	if err != nil {
-		return nil, err
-	}
-
-	bundleBytes, err := c.Bundles.Bundles()[0].Marshal()
-	if err != nil {
-		return nil, err
-	}
-
-	rootCertPool := x509.NewCertPool()
-	if ok := rootCertPool.AppendCertsFromPEM(bundleBytes); !ok {
-		return nil, errors.New("failed to append PEM")
-	}
-	clientCert := make([]tls.Certificate, 0, 1)
-
-	certs, err := tls.X509KeyPair(certBytes, keyBytes)
-	if err != nil {
-		return nil, err
-	}
-
-	clientCert = append(clientCert, certs)
-
-	return &tls.Config{
-		RootCAs:      rootCertPool,
-		Certificates: clientCert,
-	}, nil
+	return tlsconfig.MTLSClientConfig(svid, c.Bundles.Bundles()[0], tlsconfig.AuthorizeID(mysqlServerSPIFFEID)), nil
 }
 
 // OnX509ContextWatchError is run when the client runs into an error
