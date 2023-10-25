@@ -46,7 +46,7 @@ var (
 	dbConnectionString = fmt.Sprintf("%s@tcp(%s:%s)/?tls=%s", mysqlUser, mysqlHost, mysqlPort, mysqlTLSConfigName)
 
 	// SPIFFE ID for MySQL Server
-	mysqlServerSPIFFEID, _ = spiffeid.FromString("spiffe://example.org/mysql/server")
+	mysqlServerSPIFFEID = spiffeid.RequireFromString("spiffe://example.org/mysql/server")
 )
 
 func main() {
@@ -161,7 +161,7 @@ func createTLSConf(c *workloadapi.X509Context) (*tls.Config, error) {
 		return nil, err
 	}
 
-	return tlsconfig.MTLSClientConfig(svid, c.Bundles.Bundles()[0], tlsconfig.AuthorizeID(mysqlServerSPIFFEID)), nil
+	return tlsconfig.MTLSClientConfig(svid, c.Bundles, tlsconfig.AuthorizeID(mysqlServerSPIFFEID)), nil
 }
 
 // OnX509ContextWatchError is run when the client runs into an error
