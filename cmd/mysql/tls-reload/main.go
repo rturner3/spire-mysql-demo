@@ -66,7 +66,7 @@ func (w *x509Watcher) OnX509ContextUpdate(c *workloadapi.X509Context) {
 
 	log.Printf("Successfully written SVID/Bundle to disk")
 
-	db, err := common.NewMySQLDBWithSPIRETLSConfig(c, mysqlUser, mysqlClientSVIDHint)
+	db, err := common.NewMySQLDBWithSPIRETLSConfig(c, mysqlUser, "", mysqlClientSVIDHint)
 	if err != nil {
 		log.Printf("Failed to create MySQL Client: %v", err)
 		return

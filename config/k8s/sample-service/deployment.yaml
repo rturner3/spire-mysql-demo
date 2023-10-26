@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample-service
+  labels:
+    app: spire-mysql-client
+spec:
+  selector:
+    matchLabels:
+      app: spire-mysql-client
+  template:
+    metadata:
+      labels:
+        app: spire-mysql-client
+    spec:
+      hostPID: true
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+        - name: tls-reload
+          image: chiragk25/spire-mysql-sample-service:latest
+          volumeMounts:
+            - name: spire-agent-socket
+              mountPath: /run/spire/sockets
+              readOnly: true
+      volumes:
+        - name: spire-agent-socket
+          hostPath:
+            path: /run/spire/sockets
+            type: Directory
