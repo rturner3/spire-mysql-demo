@@ -2,25 +2,15 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
-	"os"
 
+	"github.com/rturner3/spire-mysql-demo/pkg/common"
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 )
 
 const (
+	// SPIRE Agent socket path
 	socketPath = "unix:///run/spire/sockets/agent.sock"
-	svidDir    = "/spire/certs"
-	bundleFile = "bundle.0.pem"
-	certFile   = "svid.0.pem"
-	keyFile    = "svid.0.key"
-)
-
-var (
-	certFilePath   = fmt.Sprintf("%s/%s", svidDir, certFile)
-	keyFilePath    = fmt.Sprintf("%s/%s", svidDir, keyFile)
-	bundleFilePath = fmt.Sprintf("%s/%s", svidDir, bundleFile)
 )
 
 func main() {
@@ -38,39 +28,10 @@ func main() {
 		log.Fatalf("Unable to fetch x509Context %v", err)
 	}
 
-	err = writeX509Context(x509Context)
-	if err != nil {
-		log.Fatalf("Failed to write SVID/Bundle to disk: %v", err)
+	if err := common.WriteMySQLServerSVIDFiles(x509Context); err != nil {
+		log.Printf("Failed to write SVID/Bundle to disk: %v", err)
+		return
 	}
 
-	log.Printf("SVID/Bundle files written successfully in %s directory", svidDir)
-}
-
-func writeX509Context(c *workloadapi.X509Context) error {
-	certBytes, keyBytes, err := c.SVIDs[0].Marshal()
-	if err != nil {
-		return err
-	}
-
-	bundleBytes, err := c.Bundles.Bundles()[0].Marshal()
-	if err != nil {
-		return err
-	}
-
-	err = os.WriteFile(certFilePath, certBytes, 0o644)
-	if err != nil {
-		return err
-	}
-
-	err = os.WriteFile(keyFilePath, keyBytes, 0o644)
-	if err != nil {
-		return err
-	}
-
-	err = os.WriteFile(bundleFilePath, bundleBytes, 0o644)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	log.Printf("SVID/Bundle files written successfully")
 }
