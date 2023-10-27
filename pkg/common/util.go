@@ -77,7 +77,7 @@ func NewMySQLDBWithSPIRETLSConfig(c *workloadapi.X509Context, mysqlUser string, 
 		return nil, err
 	}
 
-	if err = mysql.RegisterTLSConfig("spire-ssl", tlsConf); err != nil {
+	if err = mysql.RegisterTLSConfig(mysqlTLSConfigName, tlsConf); err != nil {
 		log.Printf("Failed to register MySQL TLS config: %v", err)
 		return nil, err
 	}
@@ -111,5 +111,5 @@ func getSVIDByHint(c *workloadapi.X509Context, hint string) (*x509svid.SVID, err
 			return svid, nil
 		}
 	}
-	return nil, errors.New(fmt.Sprintf("SVID not found for hint: %s", hint))
+	return nil, fmt.Errorf("svid not found for hint: %s", hint))
 }
