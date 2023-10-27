@@ -3,7 +3,6 @@ package common
 import (
 	"crypto/tls"
 	"database/sql"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -111,5 +110,5 @@ func getSVIDByHint(c *workloadapi.X509Context, hint string) (*x509svid.SVID, err
 			return svid, nil
 		}
 	}
-	return nil, fmt.Errorf("svid not found for hint: %s", hint))
+	return nil, fmt.Errorf("svid not found for hint: %s", hint)
 }
