@@ -7,4 +7,3 @@ CREATE DATABASE spiredemo;
 -- +goose StatementBegin
 DROP DATABASE spiredemo;
 -- +goose StatementEnd
-
