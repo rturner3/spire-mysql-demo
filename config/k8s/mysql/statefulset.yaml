@@ -48,6 +48,10 @@ spec:
             - containerPort: 3306
               name: mysql
           volumeMounts:
+            # mount SPIRE agent socket dir for debugging
+            - name: spire-agent-socket
+              mountPath: /run/spire/sockets
+              readOnly: true
             - name: mysql-persistent-storage
               mountPath: /var/lib/mysql
             - name: server-certs
