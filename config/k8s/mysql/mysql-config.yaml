@@ -6,6 +6,8 @@ metadata:
 data:
   mysql.cnf: |-
     [mysqld]
+    general-log=ON
+    general-log-file=/var/lib/mysql/general.log
     ssl-ca=/spire/certs/bundle.0.pem
     ssl-cert=/spire/certs/svid.0.pem
     ssl-key=/spire/certs/svid.0.key
