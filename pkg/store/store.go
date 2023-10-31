@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"sync"
 )
 
 const (
@@ -12,6 +13,7 @@ const (
 )
 
 type Store struct {
+	mu sync.Mutex
 	db *sql.DB
 }
 
@@ -33,7 +35,7 @@ func (s *Store) ListUsers(ctx context.Context) ([]User, error) {
 		return nil, err
 	}
 
-	users := make([]User, 0)
+	var users []User
 	for rows.Next() {
 		var user User
 		err = rows.Scan(&user.ID, &user.Name)
@@ -49,4 +51,10 @@ func (s *Store) CreateUser(ctx context.Context, user User) error {
 		return err
 	}
 	return nil
+}
+
+func (s *Store) UpdateDB(db *sql.DB) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.db = db
 }

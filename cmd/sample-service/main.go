@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"sync"
 
 	"github.com/gorilla/mux"
 	"github.com/rturner3/spire-mysql-demo/pkg/common"
@@ -27,11 +25,10 @@ const (
 	socketPath = "unix:///run/spire/sockets/agent.sock"
 
 	mysqlUser   = "spire-mysql-client"
-	mysalDBName = "spiredemo"
+	mysqlDBName = "spiredemo"
 )
 
 type handler struct {
-	db      *sql.DB
 	dbStore *store.Store
 }
 
@@ -98,13 +95,12 @@ func main() {
 		log.Fatalf("Unable to fetch x509Context %v", err)
 	}
 
-	db, err := common.NewMySQLDBWithSPIRETLSConfig(x509Context, mysqlUser, mysalDBName, "")
+	db, err := common.NewMySQLDBWithSPIRETLSConfig(x509Context, mysqlUser, mysqlDBName, "")
 	if err != nil {
 		log.Fatalf("Failed to create MySQL Client: %v", err)
 	}
 
 	h := &handler{
-		db:      db,
 		dbStore: store.New(db),
 	}
 
@@ -135,24 +131,20 @@ func startWatcher(ctx context.Context, client *workloadapi.Client, h *handler) {
 }
 
 type x509Watcher struct {
-	mu sync.Mutex
-	h  *handler
+	h *handler
 }
 
 // OnX509ContextUpdate is run every time an SVID is updated
 func (w *x509Watcher) OnX509ContextUpdate(c *workloadapi.X509Context) {
 	// Create new DB instance with udpate TLS config
-	db, err := common.NewMySQLDBWithSPIRETLSConfig(c, mysqlUser, mysalDBName, "")
+	db, err := common.NewMySQLDBWithSPIRETLSConfig(c, mysqlUser, mysqlDBName, "")
 	if err != nil {
 		log.Printf("Failed to create MySQL Client: %v", err)
 		return
 	}
 
-	// Update DB instance in handler
-	w.mu.Lock()
-	w.h.db = db
-	w.mu.Unlock()
-
+	// Update DB instance in store
+	w.h.dbStore.UpdateDB(db)
 	log.Printf("Successfully updated DB client TLS config")
 }
 
