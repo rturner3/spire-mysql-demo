@@ -69,22 +69,28 @@ func (p *Plugin) ComposeWorkloadX509SVID(ctx context.Context, req *credentialcom
 		return nil, err
 	}
 
-	for _, mySQLPathPrefix := range config.MySQLSPIFFEIDPathPrefixes {
-		spiffeIDRaw := req.GetSpiffeId()
-		if strings.HasPrefix(spiffeIDRaw, mySQLPathPrefix) {
-			spiffeID, err := spiffeid.FromString(spiffeIDRaw)
-			if err != nil {
-				return nil, err
-			}
+	// Extract SPIFFE ID Path from request
+	spiffeIDRaw := req.GetSpiffeId()
+	spiffeID, err := spiffeid.FromString(spiffeIDRaw)
+	if err != nil {
+		return nil, err
+	}
+	path := spiffeID.Path()
 
+	// Check whether the path for the requested SPIFFEID contains
+	// any of the configured MySQLSPIFFEIDPathPrefixes
+	for _, mySQLPathPrefix := range config.MySQLSPIFFEIDPathPrefixes {
+		if strings.HasPrefix(path, mySQLPathPrefix) {
 			// Interpret the last path component to be the MySQL username.
 			// Set the MySQL username as the Subject CN of the X.509-SVID so that it can be used for authentication to MySQL.
-			pathComponents := strings.Split(spiffeID.Path(), "/")
+			pathComponents := strings.Split(path, "/")
 			mySQLDBInstanceName := pathComponents[len(pathComponents)-1]
 			resp := &credentialcomposerv1.ComposeWorkloadX509SVIDResponse{
 				Attributes: &credentialcomposerv1.X509SVIDAttributes{
 					Subject: &credentialcomposerv1.DistinguishedName{
-						CommonName: mySQLDBInstanceName,
+						Country:      []string{"US"},
+						Organization: []string{"SPIRE"},
+						CommonName:   mySQLDBInstanceName,
 					},
 				},
 			}
