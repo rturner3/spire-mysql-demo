@@ -3,7 +3,6 @@ package common
 import (
 	"crypto/tls"
 	"database/sql"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -69,7 +68,7 @@ func WriteMySQLServerSVIDFiles(c *workloadapi.X509Context) error {
 	return nil
 }
 
-func NewMySQLDBWithSPIRETLSConfig(c *workloadapi.X509Context, mysqlUser string, svidHint string) (*sql.DB, error) {
+func NewMySQLDBWithSPIRETLSConfig(c *workloadapi.X509Context, mysqlUser string, dbName string, svidHint string) (*sql.DB, error) {
 	// Create TLS config with client certificates
 	tlsConf, err := createTLSConf(c, svidHint)
 	if err != nil {
@@ -83,7 +82,7 @@ func NewMySQLDBWithSPIRETLSConfig(c *workloadapi.X509Context, mysqlUser string, 
 	}
 
 	// Format is specified https://github.com/go-sql-driver/mysql#dsn-data-source-name
-	dbConnectionString := fmt.Sprintf("%s@tcp(%s:%s)/?tls=%s", mysqlUser, mysqlHost, mysqlPort, mysqlTLSConfigName)
+	dbConnectionString := fmt.Sprintf("%s@tcp(%s:%s)/%s?tls=%s", mysqlUser, mysqlHost, mysqlPort, dbName, mysqlTLSConfigName)
 
 	db, err := sql.Open("mysql", dbConnectionString)
 	if err != nil {
@@ -111,5 +110,5 @@ func getSVIDByHint(c *workloadapi.X509Context, hint string) (*x509svid.SVID, err
 			return svid, nil
 		}
 	}
-	return nil, fmt.Errorf("svid not found for hint: %s", hint))
+	return nil, fmt.Errorf("svid not found for hint: %s", hint)
 }
