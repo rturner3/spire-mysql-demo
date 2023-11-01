@@ -6,6 +6,7 @@ WORKDIR /go/src/github.com/rturner3/spire-mysql-demo
 COPY go.mod go.sum ./
 RUN go mod download
 COPY cmd cmd
+COPY pkg pkg
 RUN go build -o /tls-bootstrap ./cmd/mysql/tls-bootstrap
 
 # Deploy the application binary into a lean image

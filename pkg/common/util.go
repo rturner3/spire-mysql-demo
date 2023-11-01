@@ -92,6 +92,30 @@ func NewMySQLDBWithSPIRETLSConfig(c *workloadapi.X509Context, mysqlUser string, 
 	return db, nil
 }
 
+func LogSVIDs(c *workloadapi.X509Context) error {
+	for _, svid := range c.SVIDs {
+		certBytes, _, err := svid.Marshal()
+		if err != nil {
+			return err
+		}
+
+		log.Printf("X.509-SVID with hint %s:", svid.Hint)
+		log.Println(string(certBytes))
+	}
+
+	for _, bundle := range c.Bundles.Bundles() {
+		bundleBytes, err := bundle.Marshal()
+		if err != nil {
+			return err
+		}
+
+		log.Printf("Bundle for trust domain %s:", bundle.TrustDomain())
+		log.Println(string(bundleBytes))
+	}
+
+	return nil
+}
+
 func createTLSConf(c *workloadapi.X509Context, svidHint string) (*tls.Config, error) {
 	var err error
 	svid := c.DefaultSVID()

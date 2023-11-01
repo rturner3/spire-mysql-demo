@@ -140,6 +140,11 @@ type x509Watcher struct {
 
 // OnX509ContextUpdate is run every time an SVID is updated
 func (w *x509Watcher) OnX509ContextUpdate(c *workloadapi.X509Context) {
+	if err := common.LogSVIDs(c); err != nil {
+		log.Printf("Failed to log SVIDs: %v", err)
+		return
+	}
+
 	// Create new DB instance with udpate TLS config
 	db, err := common.NewMySQLDBWithSPIRETLSConfig(c, mysqlUser, mysqlDBName, "")
 	if err != nil {
@@ -170,5 +175,5 @@ func waitForCtrlC(cancel context.CancelFunc) {
 
 func writeErr(w http.ResponseWriter, err error) {
 	w.WriteHeader(http.StatusInternalServerError)
-	w.Write([]byte(fmt.Sprintf(`{"error": "%s"}`, err.Error())))
+	fmt.Fprintf(w, `{"error": "%s"}`, err.Error())
 }
