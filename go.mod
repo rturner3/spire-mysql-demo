@@ -4,7 +4,6 @@ go 1.21
 
 require (
 	github.com/go-sql-driver/mysql v1.7.1
-	github.com/gorilla/mux v1.8.0
 	github.com/hashicorp/hcl v1.0.0
 	github.com/spiffe/go-spiffe/v2 v2.1.6
 	github.com/spiffe/spire-plugin-sdk v1.8.1

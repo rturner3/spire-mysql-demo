@@ -10,7 +10,6 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/gorilla/mux"
 	"github.com/rturner3/spire-mysql-demo/pkg/common"
 	"github.com/rturner3/spire-mysql-demo/pkg/store"
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
@@ -109,10 +108,15 @@ func main() {
 
 	log.Printf("Starting API handlers")
 	// Add API handlers
-	r := mux.NewRouter()
-	r.HandleFunc(usersAPIPath, h.list).Methods(http.MethodGet)
-	r.HandleFunc(usersAPIPath, h.create).Methods(http.MethodPost)
-	log.Fatal(http.ListenAndServe(":8888", r))
+	http.HandleFunc(usersAPIPath, func(w http.ResponseWriter, req *http.Request) {
+		switch req.Method {
+		case http.MethodGet:
+			h.list(w, req)
+		case http.MethodPost:
+			h.create(w, req)
+		}
+	})
+	log.Fatal(http.ListenAndServe(":8888", nil))
 }
 
 func startWatcher(ctx context.Context, client *workloadapi.Client, h *handler) {
