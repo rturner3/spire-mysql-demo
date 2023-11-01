@@ -18,7 +18,7 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: tls-reload
-          image: chiragk25/spire-mysql-sample-service:latest
+          image: rturner0676/spire-mysql-sample-service:latest
           volumeMounts:
             - name: spire-agent-socket
               mountPath: /run/spire/sockets
