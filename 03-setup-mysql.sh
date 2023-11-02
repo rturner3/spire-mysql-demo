@@ -1,11 +1,13 @@
 #!/bin/bash
 #
 # Sets up schemas in MySQL database for sample service.
+# Before running this script, you must set up port forwarding to the MySQL pod in another shell session using:
+#   `kubectl -n mysql port-forward pod/mysql-0 <port>`
+#
 # Prerequisites:
 # - kubectl is installed and available on the PATH: https://kubernetes.io/docs/tasks/tools/
 # - mysql CLI is installed and available on the PATH
 # - Kubernetes cluster is configured with kubectl and kubectl context is set to use this cluster
-# - Port forwarding set up to MySQL pod using `kubectl -n mysql port-forward pod/mysql-0 <port>`
 
 tmp_dir=$(mktemp -d)
 trap "rm -rf ${tmp_dir}" EXIT
