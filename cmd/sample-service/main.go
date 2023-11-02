@@ -99,8 +99,11 @@ func main() {
 		log.Fatalf("Failed to create MySQL Client: %v", err)
 	}
 
+	store := store.New(db)
+	defer store.CloseDBConnection()
+
 	h := &handler{
-		dbStore: store.New(db),
+		dbStore: store,
 	}
 
 	// Start X.509 watcher
@@ -153,7 +156,11 @@ func (w *x509Watcher) OnX509ContextUpdate(c *workloadapi.X509Context) {
 	}
 
 	// Update DB instance in store
-	w.h.dbStore.UpdateDB(db)
+	err = w.h.dbStore.UpdateDB(db)
+	if err != nil {
+		log.Printf("Failed to update store DB connection: %v", err)
+		return
+	}
 	log.Printf("Successfully updated DB client TLS config")
 }
 

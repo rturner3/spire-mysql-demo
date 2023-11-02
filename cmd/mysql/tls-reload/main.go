@@ -75,6 +75,7 @@ func (w *x509Watcher) OnX509ContextUpdate(c *workloadapi.X509Context) {
 		log.Printf("Failed to create MySQL Client: %v", err)
 		return
 	}
+	defer db.Close()
 
 	_, err = db.ExecContext(context.Background(), reloadTLSQuery)
 	if err != nil {
