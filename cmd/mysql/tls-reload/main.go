@@ -59,6 +59,10 @@ type x509Watcher struct{}
 
 // OnX509ContextUpdate is run every time an SVID is updated
 func (w *x509Watcher) OnX509ContextUpdate(c *workloadapi.X509Context) {
+	if err := common.LogSVIDs(c); err != nil {
+		return
+	}
+
 	if err := common.WriteMySQLServerSVIDFiles(c); err != nil {
 		log.Printf("Failed to write SVID/Bundle to disk: %v", err)
 		return

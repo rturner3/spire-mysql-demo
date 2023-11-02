@@ -28,6 +28,10 @@ func main() {
 		log.Fatalf("Unable to fetch x509Context %v", err)
 	}
 
+	if err := common.LogSVIDs(x509Context); err != nil {
+		log.Fatalf("Failed to log SVIDs: %v", err)
+	}
+
 	if err := common.WriteMySQLServerSVIDFiles(x509Context); err != nil {
 		log.Printf("Failed to write SVID/Bundle to disk: %v", err)
 		return
