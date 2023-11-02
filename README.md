@@ -50,7 +50,7 @@ Deploy `sample-service` in the default namespace.
 
 ### Verify DB Access using Sample Service
 
-This section ![img.png](img.png)
+This section verifies DB access via mTLS using Sample Service.
 
 In a separate terminal, start port forwarding to the `sample-service` 
 ```
