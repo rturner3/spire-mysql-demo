@@ -88,17 +88,15 @@ Cleanup the environment using the cleanup script
 
 ## [Design](#design)
 
-MySQL server uses its X.509-SVIDs as server certificate and encryption whereas clients use the X.509-SVIDs to 
-authenticate to the MySQL server. 
-
 ### Architecture
 
 ![Architecture](./docs/img/architecture.png)
 
-SPIRE Server and SPIRE Agent are deployed on the Kubernetes Cluster along with registration entries created in the
-SPIRE Server. MySQL is deployed with an init-container that fetches X.509-SVID for the MySQL server and 
-writes to a tmpfs volume shared with the MySQL server container. Upon init, MySQL server container reads
-the X.509-SVID from the tmpfs volume for SSL configuration. 
+MySQL server uses its X.509-SVIDs as server certificate and encryption whereas clients use the X.509-SVIDs to
+authenticate to the MySQL server. SPIRE Server and SPIRE Agent are deployed on the Kubernetes Cluster along
+with registration entries created in the  SPIRE Server. MySQL is deployed with an init-container that fetches
+X.509-SVID from SPIRE agent and writes to a tmpfs volume shared with the MySQL server container.
+Upon init, MySQL server container reads the X.509-SVID from the tmpfs volume for SSL configuration.
 
 The sample-service also fetches its X.509 SVID from SPIRE and uses it to authenticate to MySQL server and  
 to verify MySQL server's certificate (mTLS). The design also uses SPIRE CredentialComposer plugin to configure
@@ -110,10 +108,10 @@ thereby mapping this service's identity to the user created in MySQL -
 
 ![Rotation](./docs/img/rotation.png)
 
-For security reasons, SPIRE server is configured to issue X.509-SVIDs with a relatively low TTL. This poses a challenge wrt 
-MySQL server as it constantly requires updating the server SSL configuration with new X.509-SVID content from SPIRE 
-agent. To achieve auto-rotation, MySQL server pod has a custom sidecar container called TLS reloader, 
-which is responsible for rotating the MySQL server's SSL configuration. It does so by fetching X.509-SVID updates 
-from SPIRE agent, writes them to shared tmpfs volume and executes `ALTER INSTANCE RELOAD TLS` query on the MySQL server, 
-to force MySQL server to reload  the SSL configuration from disk.
+For security reasons, SPIRE server is configured to issue X.509-SVIDs with a relatively low TTL. This poses a 
+challenge wrt MySQL server as it constantly requires updating the server SSL configuration with new X.509-SVID 
+content from SPIRE agent. To achieve auto-rotation, MySQL server pod has a custom sidecar container called 
+TLS reloader, which is responsible for rotating the MySQL server's SSL configuration. It does so by fetching 
+X.509-SVID updates from SPIRE agent, writes them to shared tmpfs volume and executes `ALTER INSTANCE RELOAD TLS` 
+query on the MySQL server, to force MySQL server to reload  the SSL configuration from disk.
 
