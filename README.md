@@ -35,7 +35,7 @@ Deploy MySQL server along with a persistent volume in the `mysql` namespace on t
 
 In a separate terminal, start port forwarding to MySQL server pod
 ```
-kubectl -n mysql port-forward service/mysql 3306:3306
+kubectl -n mysql port-forward service/mysql 9999:3306
 ```
 
 Setup MySQL users and database, by connecting to the MySQL server via port-forwarding.
