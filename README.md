@@ -105,9 +105,9 @@ The design also uses SPIRE CredentialComposer plugin to enrich X.509-SVIDs issue
 with a `Subject` with a unique Common Name - `/C=US/O=SPIRE/CN=spire-mysql-client`,
 thereby mapping this service's identity to the user created in MySQL -
 `CREATE USER 'spire-mysql-client' REQUIRE SUBJECT '/C=US/O=SPIRE/CN=spire-mysql-client'`.
-This is needed because MySQL doesn't understand the default SPIFFE authentication sematics of verifying 
-the SPIFFE ID in `URI SAN` in X.509-SVIDs. Hence, customizing a unique `Subject` per workload enables use to configure MySQL 
-with `Subject` based X.509 verification for authentication.
+This is needed because MySQL doesn't understand the default SPIFFE authentication semantics of verifying 
+the SPIFFE ID in the `URI SAN` in X.509-SVIDs. Hence, customizing a unique `Subject` per workload enables MySQL
+to authenticate callers based on the X.509 `Subject` field.
 
 ### Certificate Auto-Rotation
 
