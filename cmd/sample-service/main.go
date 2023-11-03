@@ -148,20 +148,13 @@ func (w *x509Watcher) OnX509ContextUpdate(c *workloadapi.X509Context) {
 		return
 	}
 
-	// Create new DB instance with udpate TLS config
-	db, err := common.NewMySQLDBWithSPIRETLSConfig(c, mysqlUser, mysqlDBName, "")
-	if err != nil {
-		log.Printf("Failed to create MySQL Client: %v", err)
+	// Register TLS config with new certificates
+	if err := common.RegisterTLSConfig(c, ""); err != nil {
+		log.Printf("Failed to register MySQL TLS config: %v", err)
 		return
 	}
 
-	// Update DB instance in store
-	err = w.h.dbStore.UpdateDB(db)
-	if err != nil {
-		log.Printf("Failed to update store DB connection: %v", err)
-		return
-	}
-	log.Printf("Successfully updated DB client TLS config")
+	log.Printf("Successfully updated MySQL TLS config")
 }
 
 // OnX509ContextWatchError is run when the client runs into an error

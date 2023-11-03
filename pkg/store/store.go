@@ -53,17 +53,6 @@ func (s *Store) CreateUser(ctx context.Context, user User) error {
 	return nil
 }
 
-// UpdateDB closes the current DB connection and
-func (s *Store) UpdateDB(db *sql.DB) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	if err := s.CloseDBConnection(); err != nil {
-		return err
-	}
-	s.db = db
-	return nil
-}
-
 func (s *Store) CloseDBConnection() error {
 	return s.db.Close()
 }
