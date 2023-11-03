@@ -13,7 +13,7 @@ const (
 )
 
 type Store struct {
-	mu sync.Mutex
+	mu sync.RWMutex
 	db *sql.DB
 }
 
@@ -29,6 +29,8 @@ type User struct {
 }
 
 func (s *Store) ListUsers(ctx context.Context) ([]User, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 	rows, err := s.db.QueryContext(ctx, listUsersQuery)
 	if err != nil {
 		log.Printf("Failed to run list users query: %v", err)
@@ -46,9 +48,20 @@ func (s *Store) ListUsers(ctx context.Context) ([]User, error) {
 }
 
 func (s *Store) CreateUser(ctx context.Context, user User) error {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 	if _, err := s.db.ExecContext(ctx, createUserQuery, user.Name); err != nil {
 		log.Printf("Failed to run list users query: %v", err)
 		return err
 	}
 	return nil
+}
+
+func (s *Store) UpdateDB(db *sql.DB) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if err := s.db.Close(); err != nil {
+		log.Printf("Failed to close existing DB connection: %v", err)
+	}
+	s.db = db
 }
