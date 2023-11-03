@@ -52,7 +52,3 @@ func (s *Store) CreateUser(ctx context.Context, user User) error {
 	}
 	return nil
 }
-
-func (s *Store) CloseDBConnection() error {
-	return s.db.Close()
-}

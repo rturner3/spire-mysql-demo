@@ -98,12 +98,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create MySQL Client: %v", err)
 	}
-
-	store := store.New(db)
-	defer store.CloseDBConnection()
+	defer db.Close()
 
 	h := &handler{
-		dbStore: store,
+		dbStore: store.New(db),
 	}
 
 	// Start X.509 watcher
