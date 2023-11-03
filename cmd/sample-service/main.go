@@ -154,7 +154,7 @@ func (w *x509Watcher) OnX509ContextUpdate(c *workloadapi.X509Context) {
 		return
 	}
 
-	log.Printf("Successfully updated MySQL TLS config")
+	log.Printf("Successfully updated MySQL client TLS config")
 }
 
 // OnX509ContextWatchError is run when the client runs into an error
