@@ -70,13 +70,7 @@ func WriteMySQLServerSVIDFiles(c *workloadapi.X509Context) error {
 
 func NewMySQLDBWithSPIRETLSConfig(c *workloadapi.X509Context, mysqlUser string, dbName string, svidHint string) (*sql.DB, error) {
 	// Create TLS config with client certificates
-	tlsConf, err := createTLSConf(c, svidHint)
-	if err != nil {
-		log.Printf("Failed to create MySQL TLS config: %v", err)
-		return nil, err
-	}
-
-	if err = mysql.RegisterTLSConfig(mysqlTLSConfigName, tlsConf); err != nil {
+	if err := RegisterTLSConfig(c, svidHint); err != nil {
 		log.Printf("Failed to register MySQL TLS config: %v", err)
 		return nil, err
 	}
@@ -90,6 +84,16 @@ func NewMySQLDBWithSPIRETLSConfig(c *workloadapi.X509Context, mysqlUser string, 
 		return nil, err
 	}
 	return db, nil
+}
+
+func RegisterTLSConfig(c *workloadapi.X509Context, svidHint string) error {
+	// Create TLS config with client certificates
+	tlsConf, err := createTLSConf(c, svidHint)
+	if err != nil {
+		return err
+	}
+
+	return mysql.RegisterTLSConfig(mysqlTLSConfigName, tlsConf)
 }
 
 func LogSVIDs(c *workloadapi.X509Context) error {

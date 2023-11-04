@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"time"
 
 	"github.com/rturner3/spire-mysql-demo/pkg/common"
 	"github.com/rturner3/spire-mysql-demo/pkg/store"
@@ -23,8 +24,9 @@ const (
 	// SPIRE Agent socket path
 	socketPath = "unix:///run/spire/sockets/agent.sock"
 
-	mysqlUser   = "spire-mysql-client"
-	mysqlDBName = "spiredemo"
+	mysqlUser            = "spire-mysql-client"
+	mysqlDBName          = "spiredemo"
+	dbConnectionLifetime = 2 * time.Minute
 )
 
 type handler struct {
@@ -98,6 +100,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create MySQL Client: %v", err)
 	}
+	defer db.Close()
 
 	h := &handler{
 		dbStore: store.New(db),
@@ -151,6 +154,10 @@ func (w *x509Watcher) OnX509ContextUpdate(c *workloadapi.X509Context) {
 		log.Printf("Failed to create MySQL Client: %v", err)
 		return
 	}
+
+	// Set max connection lifetime to be slightly more than the frequency of SVID updates from SPIRE (2m vs 1m)
+	// so that we do don't close connection before establishing a new one
+	db.SetConnMaxLifetime(dbConnectionLifetime)
 
 	// Update DB instance in store
 	w.h.dbStore.UpdateDB(db)
