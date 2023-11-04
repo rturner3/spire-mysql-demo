@@ -24,9 +24,10 @@ const (
 	// SPIRE Agent socket path
 	socketPath = "unix:///run/spire/sockets/agent.sock"
 
-	mysqlUser            = "spire-mysql-client"
-	mysqlDBName          = "spiredemo"
-	dbConnectionLifetime = 2 * time.Minute
+	mysqlUser   = "spire-mysql-client"
+	mysqlDBName = "spiredemo"
+	// dbConnectionLifetime is set to 75% of service's X.509-SVID TTL to ensure new connections use new, rotated SVID
+	dbConnectionLifetime = 30 * time.Hour
 )
 
 type handler struct {
@@ -155,8 +156,8 @@ func (w *x509Watcher) OnX509ContextUpdate(c *workloadapi.X509Context) {
 		return
 	}
 
-	// Set max connection lifetime to be slightly more than the frequency of SVID updates from SPIRE (2m vs 1m)
-	// so that we do don't close connection before establishing a new one
+	// Set max connection lifetime to be slightly more than the frequency of SVID updates from SPIRE
+	// so that we don't close connection before establishing a new one
 	db.SetConnMaxLifetime(dbConnectionLifetime)
 
 	// Update DB instance in store
