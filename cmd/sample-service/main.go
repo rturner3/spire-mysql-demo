@@ -27,7 +27,7 @@ const (
 	mysqlUser   = "spire-mysql-client"
 	mysqlDBName = "spiredemo"
 	// dbConnectionLifetime is set to 75% of service's X.509-SVID TTL to ensure new connections use new, rotated SVID
-	dbConnectionLifetime = 30 * time.Hour
+	dbConnectionLifetime = 2 * time.Minute
 )
 
 type handler struct {

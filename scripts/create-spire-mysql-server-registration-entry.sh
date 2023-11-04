@@ -8,13 +8,11 @@ source "${SCRIPT_DIR}/common.sh"
 bb=$(tput bold)
 nn=$(tput sgr0)
 
-forty_eight_hours_in_seconds=172800
-
 echo "${bb}Creating registration entry for mysql...${nn}"
 spire_server entry create \
     -parentID spiffe://example.org/ns/spire/sa/spire-agent \
     -spiffeID spiffe://example.org/mysql/server \
-    -x509SVIDTTL "${forty_eight_hours_in_seconds}" \
+    -x509SVIDTTL 120 \
     -hint mysql-server \
     -dns mysql.mysql.svc.cluster.local \
     -selector k8s:ns:mysql \
